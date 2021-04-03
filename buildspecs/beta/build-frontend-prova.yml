@@ -12,11 +12,12 @@ phases:
       - cd $CODEBUILD_SRC_DIR_App
       - echo Installing source NPM dependencies...
       - npm install -g yarn
+      - npm install -g vue-cli
       - yarn install
       - touch src/.env.js
       - echo "API_PORT = '5000'" >> src/.env.js
       - echo "DOMAIN_TITLE = 'teste.ezops.cloud'" >> src/.env.js
-      - echo "API_URL = '${DOMAIN_TITLE}:&{API_PORT}'" >> src/.env.js
+      - echo "API_URL = '${DOMAIN_TITLE}:${API_PORT}'" >> src/.env.js
   build:
     commands:
       - echo Build started on `date`
