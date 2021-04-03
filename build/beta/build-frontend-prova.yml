@@ -1,0 +1,32 @@
+version: 0.2
+env:
+  parameter-store:
+    DEPLOY_BUCKET: "/ECS-CLUSTER/${ClusterName}/${ProjectName}/AWS_S3"
+    DISTRIBUTION_ID: "/ECS-CLUSTER/${ClusterName}/${ProjectName}/DISTRIBUTION_ID"
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+  pre_build:
+    commands:
+      - cd $CODEBUILD_SRC_DIR_App
+      - echo Installing source NPM dependencies...
+      - npm install -g yarn
+      - yarn install
+      - mkdir src
+      - touch src/.env.js
+      - echo "API_PORT = '5000'" >> src/.env.js
+      - echo "DOMAIN_TITLE = 'teste.ezops.cloud'" >> src/.env.js
+      - echo "API_URL = '${DOMAIN_TITLE}:&{API_PORT}'" >> src/.env.js
+  build:
+    commands:
+      - echo Build started on `date`
+      - yarn build
+  post_build:
+    commands:
+      # copy the contents of /build to S3
+      - aws s3 sync --acl public-read ./dist s3://$DEPLOY_BUCKET/ 
+      # to force CloudFront to update its edge locations with the new versions
+      - >
+        aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID 
+        --paths /index.html "/assets*"
