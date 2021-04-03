@@ -13,7 +13,6 @@ phases:
       - echo Installing source NPM dependencies...
       - npm install -g yarn
       - yarn install
-      - mkdir src
       - touch src/.env.js
       - echo "API_PORT = '5000'" >> src/.env.js
       - echo "DOMAIN_TITLE = 'teste.ezops.cloud'" >> src/.env.js
