@@ -8,7 +8,7 @@ phases:
       - TAG="latest"
   pre_build:
     commands:
-      - cd $CODEBUILD_SRC_DIR_App/app
+      - cd $CODEBUILD_SRC_DIR_App
       - docker build --tag "${REPOSITORY_URI}:${TAG}" .
       - docker tag $REPOSITORY_URI:$TAG $REPOSITORY_URI:$IMAGE_TAG
   post_build:
