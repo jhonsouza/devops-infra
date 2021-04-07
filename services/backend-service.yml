@@ -246,16 +246,6 @@ Resources:
               Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:DB_PORT}}'
             - Name: DN_NAME
               Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:DN_NAME}}'
-            - Name: POSTGRES_USER
-              Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:POSTGRES_USER}}'
-            - Name: POSTGRES_PASSWORD
-              Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:POSTGRES_PASSWORD}}'
-            - Name: POSTGRES_DB
-              Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:POSTGRES_DB}}'
-            - Name: PGADMIN_DEFAULT_EMAIL
-              Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:PGADMIN_DEFAULT_EMAIL}}'
-            - Name: PGADMIN_DEFAULT_PASSWORD
-              Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:PGADMIN_DEFAULT_PASSWORD}}'
     
   Service:
     Type: AWS::ECS::Service
