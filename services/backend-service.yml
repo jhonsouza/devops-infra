@@ -244,8 +244,8 @@ Resources:
               Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:DB_HOST}}'
             - Name: DB_PORT
               Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:DB_PORT}}'
-            - Name: DB_NAME
-              Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:DB_NAME}}'
+            - Name: DN_NAME
+              Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:DN_NAME}}'
             - Name: POSTGRES_USER
               Value: !Sub '{{resolve:secretsmanager:${StageEnv}/API:SecretString:POSTGRES_USER}}'
             - Name: POSTGRES_PASSWORD
