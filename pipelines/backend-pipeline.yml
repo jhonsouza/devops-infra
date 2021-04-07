@@ -25,9 +25,6 @@ Parameters:
   StackName:
     Type: String
 
-  ArtifactBucket:
-    Type: String
-
   HostedZoneName:
     Type: String
 
@@ -48,14 +45,6 @@ Parameters:
     Default: 1
     Type: Number
 
-  MemoryReservationSidekiq:
-    Default: "1024"
-    Type: String
-
-  CPUSidekiq:
-    Default: 1
-    Type: Number
-
   ClusterName:
     Default: Application
     Type: String
@@ -65,10 +54,23 @@ Parameters:
 
   LoadBalancerCname:
     Type: String
-
   
+  ContainerPort:
+    Type: String
+  
+  ApiHealthCheckPath:
+    Type: String
+  
+  EnvironmentFolder:
+    Type: String
+    Default: development
 
 Resources:
+
+  ArtifactBucket: 
+    Type: 'AWS::S3::Bucket'
+    Properties: {}
+
   Repository:
     Type: AWS::ECR::Repository
     DeletionPolicy: Delete
@@ -194,35 +196,11 @@ Resources:
       Name: !Sub cb-${ClusterName}-${ProjectName}
       ServiceRole: !Ref CodeBuildServiceRole
       Artifacts:
-        Location: !Ref ArtifactBucket
-        Type: "S3"
+        Type: CODEPIPELINE
+        Name: !Ref ProjectName
       Source:
-        Location: !Sub ${ArtifactBucket}/source.zip
-        Type: "S3"
-        BuildSpec: |
-          version: 0.2
-          phases:
-            install:
-              commands:
-                - echo $DB_ADDRESS
-                - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
-                - COMMIT_HASH="$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
-                - TAG="latest"
-            pre_build:
-              commands:
-                # - cp -r $CODEBUILD_SRC_DIR_Infra/environments/production/Dockerfile .
-                - docker build --tag "${REPOSITORY_URI}:${TAG}" .
-                - docker tag $REPOSITORY_URI:$TAG $REPOSITORY_URI:$COMMIT_HASH
-            post_build:
-              commands:
-                - docker push "${REPOSITORY_URI}:${TAG}"
-                - docker push "${REPOSITORY_URI}:${COMMIT_HASH}"
-                - printf '{"tag":"%s:%s"}' "$REPOSITORY_URI" "$COMMIT_HASH" > /tmp/build.json
-                - cat /tmp/build.json
-          artifacts:
-            files: 
-              - /tmp/build.json
-            discard-paths: yes
+        Type: CODEPIPELINE
+        BuildSpec: !Sub "buildspec/${EnvironmentFolder}/build-backend.yml"
       VpcConfig:
         VpcId:
           'Fn::ImportValue': !Sub ${ClusterName}VPC
@@ -301,13 +279,15 @@ Resources:
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Ref CodeBuildProject
-                PrimarySource: App
+                PrimarySource: Infra
               InputArtifacts:
                 - Name: App
                 - Name: Infra
               OutputArtifacts:
                 - Name: BuildOutput
               RunOrder: 1
+        - Name: DeployApp
+          Actions:  
             - Name: CreateChangeSet
               ActionTypeId:
                 Category: Deploy
@@ -331,8 +311,10 @@ Resources:
                     "LoadBalancerCname": "${LoadBalancerCname}",
                     "EcsTasksNumber": "1",
                     "DockerImageVersion": { "Fn::GetParam" : [ "BuildOutput", "build.json", "tag" ] },
-                    "TypeProject": "${ProjectName}",
-                    "StageEnv": ${ENV}
+                    "ProjectName": "${ProjectName}",
+                    "StageEnv": "${ENV}",
+                    "ContainerPort": "${ContainerPort}",
+                    "AlbHealthCheckPath": "${ApiHealthCheckPath}"
                   }
               RunOrder: 1
               InputArtifacts:
