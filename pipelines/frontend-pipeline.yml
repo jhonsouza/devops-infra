@@ -82,7 +82,7 @@ Resources:
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              - Resource: "*"
+              - Resource: "*" # acesso para mais de um recurso
                 Effect: Allow
                 Action:
                   - iam:*

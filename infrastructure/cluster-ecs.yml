@@ -171,10 +171,10 @@ Resources:
       BlockDeviceMappings:
         - DeviceName: "/dev/xvda"
           Ebs:
-            VolumeSize: '100'
+            VolumeSize: '15'
         - DeviceName: "/dev/xvdcz"
           Ebs:
-            VolumeSize: '100'
+            VolumeSize: '15'
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
